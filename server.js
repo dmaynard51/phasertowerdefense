@@ -3,7 +3,7 @@ var fs = require('fs');
 
 const PORT=process.env.PORT; 
 
-fs.readFile('./home.html', function (err, html) {
+fs.readFile('./index.html', function (err, html) {
 
     if (err) throw err;    
 

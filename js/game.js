@@ -29,6 +29,7 @@ var score = 0;
 var scoreString = '';
 var scoreText;
 var lives;
+var probeLives;
 var enemyBullet;
 var firingTimer = 0;
 var stateText;
@@ -67,7 +68,7 @@ function create() {
     game.physics.enable(player, Phaser.Physics.ARCADE);
     
     // the probe
-    probe = game.add.sprite(200, 500, 'probeImage');
+    probe = game.add.sprite(200, 500, 'ship');
     probe.anchor.setTo(0.3, 0.3);
     game.physics.enable(probe, Phaser.Physics.ARCADE);
 
@@ -86,6 +87,10 @@ function create() {
     lives = game.add.group();
     game.add.text(game.world.width - 100, 10, 'Lives : ', { font: '34px Arial', fill: '#fff' });
 
+    //  Probe Lives
+    probeLives = game.add.group();
+    game.add.text(game.world.width - 500, 10, 'Probe Lives : ', { font: '34px Arial', fill: '#fff' });
+
     //  Text
     stateText = game.add.text(game.world.centerX,game.world.centerY,' ', { font: '84px Arial', fill: '#fff' });
     stateText.anchor.setTo(0.5, 0.5);
@@ -97,6 +102,16 @@ function create() {
         ship.anchor.setTo(0.5, 0.5);
         ship.angle = 90;
         ship.alpha = 0.4;
+    }
+
+
+    //create probe lives
+    for (var i = 0; i < 3; i++) 
+    {
+        var ship1 = probeLives.create(game.world.width - 500 + (30 * i), 60, 'ship');
+        ship1.anchor.setTo(0.5, 0.5);
+        ship1.angle = 90;
+        ship1.alpha = 0.4;
     }
 
     //  An explosion pool
@@ -184,7 +199,7 @@ function update() {
         game.physics.arcade.overlap(enemyBullets, player, enemyHitsPlayer, null, this);
         game.physics.arcade.overlap(aliens, player, alienHitsPlayer, null, this);   
         game.physics.arcade.overlap(aliens, enemyBullet, probeHitsAliens, null, this);   
-        
+        game.physics.arcade.overlap(aliens, probe, alienHitsProbe, null, this);  
     }
 
 }
@@ -345,6 +360,60 @@ function alienHitsPlayer (player,alien) {
 
 }
 
+
+function alienHitsProbe (probe,alien) {
+    
+
+
+    probeLive = probeLives.getFirstAlive();
+
+    if (probeLive)
+    {
+        alien.kill();
+        probeLive.kill();
+
+        //  And create an explosion :)
+        var explosion = explosions.getFirstExists(false);
+        explosion.reset(probe.body.x, probe.body.y);
+        explosion.play('kaboom', 30, false, true);
+    
+    
+    
+    
+        
+    
+    
+    
+    
+        //  And create an explosion :)
+        var explosion = explosions.getFirstExists(false);
+        explosion.reset(alien.body.x, alien.body.y);
+        explosion.play('kaboom', 30, false, true);
+        
+        
+    }
+    
+    if (probeLives.countLiving() < 1)
+    {
+        probe.kill();
+    }
+
+/*
+    if (aliens.countLiving() == 0)
+    {
+        score += 1000;
+        scoreText.text = scoreString + score;
+
+        enemyBullets.callAll('kill',this);
+        stateText.text = " You Won, \n Click to restart";
+        stateText.visible = true;
+
+        //the "click to restart" handler
+        game.input.onTap.addOnce(restart,this);
+    }   */ 
+
+}
+
 function enemyFires () {
 
     //  Grab the first bullet we can from the pool
@@ -437,12 +506,14 @@ function restart () {
     
     //resets the life count
     lives.callAll('revive');
+    probeLives.callAll('revive');    
     //  And brings the aliens back from the dead :)
     aliens.removeAll();
     createAliens();
 
     //revives the player
     player.revive();
+    probe.revive();    
     //hides the text
     stateText.visible = false;
 

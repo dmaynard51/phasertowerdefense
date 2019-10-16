@@ -153,10 +153,10 @@ function createAliens () {
     aliens.y = 50;
 
     //  All this does is basically start the invaders moving. Notice we're moving the Group they belong to, rather than the invaders directly.
-    var tween = game.add.tween(aliens).to( { y: 500 }, 4000, Phaser.Easing.Linear.None, true, 0, 1000, true);
+
 
     //  When the tween loops it calls descend
-    tween.onLoop.add(descend, this);
+    //tween.onLoop.add(descend, this);
 }
 
 function setupInvader (invader) {
@@ -177,7 +177,18 @@ function update() {
 
     //  Scroll the background
     starfield.tilePosition.y += 2;
-
+    
+    aliens.y += 2;
+    
+    //if aliens move below the screen kill them all
+    if (aliens.y == 550)
+    {
+        for (var i = 0; i < livingEnemies.length; i++)
+        {
+            livingEnemies[i].kill();
+        }
+    }
+    
     if (player.alive)
     {
         //  Reset the player, then check for movement keys

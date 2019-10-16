@@ -1,6 +1,16 @@
+
 function myGame() {
 
-var game = new Phaser.Game(800, 600, Phaser.AUTO, 'phaser-example', { preload: preload, create: create, update: update, render: render });
+var config = {
+   width:800,
+   height: 600,
+   renderer: Phaser.AUTO,
+   parent: "tower defense",
+   state: {preload: preload, create: create, update : update, render: render},
+};
+
+
+var game = new Phaser.Game(config);
 
 function preload() {
 

@@ -189,6 +189,11 @@ function update() {
         }
     }
     
+    if (livingEnemies.length == 0)
+    {
+        createAliens();
+    }
+    
     if (player.alive)
     {
         //  Reset the player, then check for movement keys

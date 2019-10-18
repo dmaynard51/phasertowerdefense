@@ -42,8 +42,13 @@ var lives;
 var probeLives;
 var enemyBullet;
 var firingTimer = 0;
+var probeFiringTimer = 0;
 var stateText;
 var livingEnemies = [];
+var text1;
+var counter = 0;
+var weapon1;
+
 
 function create() {
 
@@ -61,6 +66,9 @@ function create() {
     bullets.setAll('anchor.y', 1);
     bullets.setAll('outOfBoundsKill', true);
     bullets.setAll('checkWorldBounds', true);
+    
+
+    
 
     // The enemy's bullets
     enemyBullets = game.add.group();
@@ -72,6 +80,29 @@ function create() {
     enemyBullets.setAll('outOfBoundsKill', true);
     enemyBullets.setAll('checkWorldBounds', true);
 
+
+    weapon1 = game.add.weapon(1, 'enemyBullet');
+    
+
+    //  The bullet will be automatically killed when it leaves the world bounds
+    weapon1.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
+    //weapon.createMultiple(30, 'bullet');
+    //weapon.setAll('anchor.x', 0.5);
+    //weapon.setAll('anchor.y', 1);
+
+    //  Because our bullet is drawn facing up, we need to offset its rotation:
+    //weapon1.bulletAngleOffset = 90;
+    weapon1.setBulletBodyOffset(32, 32, 24, 34);
+
+    //  The speed at which the bullet is fired
+    weapon1.bulletSpeed = 400;
+
+    //  Speed-up the rate of fire, allowing them to shoot 1 bullet every 60ms
+    weapon1.fireRate = 10;
+    
+    
+
+
     //  The hero!
     player = game.add.sprite(400, 500, 'ship');
     player.anchor.setTo(0.5, 0.5);
@@ -80,11 +111,16 @@ function create() {
     // the probe
     probe = game.add.sprite(200, 500, 'ship');
     probe.anchor.setTo(0.3, 0.3);
+    probe.inputEnabled = true;
     game.physics.enable(probe, Phaser.Physics.ARCADE);
+    
+    
+    weapon1.trackSprite(probe);        
 
     //  The baddies!
     aliens = game.add.group();
     aliens.enableBody = true;
+    
     aliens.physicsBodyType = Phaser.Physics.ARCADE;
 
     createAliens();
@@ -133,13 +169,16 @@ function create() {
     cursors = game.input.keyboard.createCursorKeys();
     fireButton = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
     
+    
+    text1 = game.add.text(170, 460, 'test', { fill: '#ffffff' });    
+
 }
 
 function createAliens () {
 
-    for (var y = 0; y < 3; y++)
+    for (var y = 0; y < Math.floor(Math.random() * 5) + 1; y++)
     {
-        for (var x = 0; x < 10; x++)
+        for (var x = 0; x < Math.floor(Math.random() * 10) + 6; x++)
         {
             var alien = aliens.create(x * 48, y * 50, 'invader');
             alien.anchor.setTo(0.5, 0.5);
@@ -174,7 +213,7 @@ function descend() {
 }
 
 function update() {
-
+    probe.events.onInputDown.add(listener, this);    
     //  Scroll the background
     starfield.tilePosition.y += 2;
     
@@ -213,19 +252,38 @@ function update() {
         {
             fireBullet();
         }
+        
+
 
         if (game.time.now > firingTimer)
         {
             enemyFires();
-            probeFires();
+            
+            
         }
+        
+        if (game.time.now > probeFiringTimer)
+        {
+            
+            
+            //only fire if probe is still alive
+            if (probeLives => 1)
+            {
+                probeFires();
+            }
+        }        
 
         //  Run collision
         game.physics.arcade.overlap(bullets, aliens, collisionHandler, null, this);
         game.physics.arcade.overlap(enemyBullets, player, enemyHitsPlayer, null, this);
         game.physics.arcade.overlap(aliens, player, alienHitsPlayer, null, this);   
-        game.physics.arcade.overlap(aliens, enemyBullet, probeHitsAliens, null, this);   
+        //game.physics.arcade.overlap(aliens, weapon1, probeHitsAliens, null, this); 
+        
+        game.physics.arcade.overlap(aliens, weapon1.bullets, collisionHandler, null, this);
+        //game.physics.arcade.collide(aliens, weapon);
         game.physics.arcade.overlap(aliens, probe, alienHitsProbe, null, this);  
+        
+//game.physics.arcade.overlap(this.weapon.bullets, this.aliens, this.probeHitsAliens, null, this);        
     }
 
 }
@@ -269,10 +327,11 @@ function collisionHandler (bullet, alien) {
 
 }
 
-function probeHitsAliens (enemyBullet, alien) {
+
+function probeHitsAliens (alien, weapon1) {
 
     //  When a bullet hits an alien we kill them both
-    enemyBullet.kill();
+    weapon1.kill();
     alien.kill();
 
     //  Increase the score
@@ -289,7 +348,7 @@ function probeHitsAliens (enemyBullet, alien) {
         score += 1000;
         scoreText.text = scoreString + score;
 
-        enemyBullets.callAll('kill',this);
+        weapon1.callAll('kill',this);
         stateText.text = " You Won, \n Click to restart";
         stateText.visible = true;
 
@@ -472,8 +531,35 @@ function enemyFires () {
 
 function probeFires () {
 
+
+    livingEnemies.length=0;
+
+    aliens.forEachAlive(function(alien){
+
+        // put every living enemy in an array
+        livingEnemies.push(alien);
+    });
+
+
+    if (livingEnemies.length > 0)
+    {
+        
+        var random=game.rnd.integerInRange(0,livingEnemies.length-1);
+
+        // randomly select one of them
+        //var shooter=probe;
+        weapon1.fireAtSprite(livingEnemies[random]);
+        
+        // And fire the bullet from this enemy
+        //enemyBullet.reset(shooter.body.x, shooter.body.y);
+
+        //game.physics.arcade.moveToObject(enemyBullet,livingEnemies[random],120);
+        //probeFiringTimer = game.time.now + 1000;
+    }
+
+/*
     //  Grab the first bullet we can from the pool
-    enemyBullet = enemyBullets.getFirstExists(false);
+    enemyBullet = weapon.getFirstExists(false);
 
     livingEnemies.length=0;
 
@@ -495,8 +581,22 @@ function probeFires () {
         enemyBullet.reset(shooter.body.x, shooter.body.y);
 
         game.physics.arcade.moveToObject(enemyBullet,livingEnemies[random],120);
-        firingTimer = game.time.now + 2000;
+        probeFiringTimer = game.time.now + 1000;
     }
+*/
+}
+
+
+function listener () {
+    
+    if (score >= 20){
+        score -= 20;
+        scoreText.text = scoreString + score;
+        weapon1.bulletSpeed += 300;
+        counter++;
+        text1.text = "You clicked " + counter + " times!";
+    }
+
 
 }
 

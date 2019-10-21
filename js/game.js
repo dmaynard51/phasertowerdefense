@@ -22,11 +22,17 @@ function preload() {
     game.load.image('starfield', 'assets/games/invaders/starfield.png');
     game.load.image('background', 'assets/games/starstruck/background2.png');
     game.load.image('probeImage', 'assets/games/invaders/player.png');
-
+    
+    
+    game.load.spritesheet('button', 'assets/sprites/gem.png', 100, 5);    
+    game.load.spritesheet('button2', 'assets/sprites/blue_ball.png', 193, 71);   
+    //spritesheet(key, url, frameWidth, frameHeight, frameMax, margin, spacing) 
+    
 }
 
 var probe;
-
+var button;
+var button2;
 var player;
 var aliens;
 var bullets;
@@ -67,7 +73,12 @@ function create() {
     bullets.setAll('outOfBoundsKill', true);
     bullets.setAll('checkWorldBounds', true);
     
+    game.stage.backgroundColor = '#4b0049';
 
+    button = game.add.button(game.world.centerX - 350, 460, 'button', listener, this, 2, 1, 0);  
+    
+    button2 = game.add.button(game.world.centerX - 300, 460, 'button2', listener, this, 2, 1, 0);    
+    button2.scale.setTo(5, 5);
     
 
     // The enemy's bullets
@@ -279,7 +290,7 @@ function update() {
         game.physics.arcade.overlap(aliens, player, alienHitsPlayer, null, this);   
         //game.physics.arcade.overlap(aliens, weapon1, probeHitsAliens, null, this); 
         
-        game.physics.arcade.overlap(aliens, weapon1.bullets, collisionHandler, null, this);
+        game.physics.arcade.overlap(aliens, weapon1.bullets, probeHitsAliens, null, this);
         //game.physics.arcade.collide(aliens, weapon);
         game.physics.arcade.overlap(aliens, probe, alienHitsProbe, null, this);  
         
@@ -481,6 +492,8 @@ function alienHitsProbe (probe,alien) {
     if (probeLives.countLiving() < 1)
     {
         probe.kill();
+        weapon1.fireRate = 100000;
+        //weapon1.kill();
     }
 
 /*
@@ -648,3 +661,14 @@ function restart () {
 
 
     }
+
+
+function nukeButton() {
+
+    button.pendingDestroy = true;
+
+    text = game.add.text(game.world.centerX, game.world.centerY, '- button nuked -', { font: '64px Arial', fill: '#ffffff' });
+
+    text.anchor.set(0.5);
+
+}

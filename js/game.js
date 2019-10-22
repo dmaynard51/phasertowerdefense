@@ -54,7 +54,7 @@ var livingEnemies = [];
 var text1;
 var counter = 0;
 var weapon1;
-
+var numEnemies =1;
 
 function create() {
 
@@ -102,8 +102,8 @@ function create() {
     //weapon.setAll('anchor.y', 1);
 
     //  Because our bullet is drawn facing up, we need to offset its rotation:
-    //weapon1.bulletAngleOffset = 90;
-    weapon1.setBulletBodyOffset(32, 32, 24, 34);
+    weapon1.bulletAngleOffset = 90;
+    weapon1.setBulletBodyOffset(32, 32, 20, 34);
 
     //  The speed at which the bullet is fired
     weapon1.bulletSpeed = 400;
@@ -135,6 +135,8 @@ function create() {
     aliens.physicsBodyType = Phaser.Physics.ARCADE;
 
     createAliens();
+
+
 
     //  The score
     scoreString = 'Score : ';
@@ -186,12 +188,12 @@ function create() {
 }
 
 function createAliens () {
-
-    for (var y = 0; y < Math.floor(Math.random() * 5) + 1; y++)
+    //numEnemies *= 2;
+    for (var y = 0; y < numEnemies; y++)
     {
-        for (var x = 0; x < Math.floor(Math.random() * 10) + 6; x++)
+        for (var x = 0; x < 5; x++)
         {
-            var alien = aliens.create(x * 48, y * 50, 'invader');
+            var alien = aliens.create(x * 50, y * 50, 'invader');
             alien.anchor.setTo(0.5, 0.5);
             alien.animations.add('fly', [ 0, 1, 2, 3 ], 20, true);
             alien.play('fly');
@@ -228,7 +230,8 @@ function update() {
     //  Scroll the background
     starfield.tilePosition.y += 2;
     
-    aliens.y += 2;
+    //speed of the aliens
+    aliens.y += .5;
     
     //if aliens move below the screen kill them all
     if (aliens.y == 550)
@@ -241,7 +244,9 @@ function update() {
     
     if (livingEnemies.length == 0)
     {
+        numEnemies +=1;
         createAliens();
+        console.log(numEnemies);        
     }
     
     if (player.alive)
@@ -266,12 +271,6 @@ function update() {
         
 
 
-        if (game.time.now > firingTimer)
-        {
-            enemyFires();
-            
-            
-        }
         
         if (game.time.now > probeFiringTimer)
         {
@@ -345,6 +344,7 @@ function probeHitsAliens (alien, weapon1) {
     weapon1.kill();
     alien.kill();
 
+
     //  Increase the score
     score += 20;
     scoreText.text = scoreString + score;
@@ -354,19 +354,21 @@ function probeHitsAliens (alien, weapon1) {
     explosion.reset(alien.body.x, alien.body.y);
     explosion.play('kaboom', 30, false, true);
 
+
+/*
     if (aliens.countLiving() == 0)
     {
         score += 1000;
         scoreText.text = scoreString + score;
 
-        weapon1.callAll('kill',this);
+        //weapon1.callAll('kill',this);
         stateText.text = " You Won, \n Click to restart";
         stateText.visible = true;
 
         //the "click to restart" handler
         game.input.onTap.addOnce(restart,this);
     }
-
+*/
 }
 
 
@@ -605,7 +607,7 @@ function listener () {
     if (score >= 20){
         score -= 20;
         scoreText.text = scoreString + score;
-        weapon1.bulletSpeed += 300;
+        weapon1.bulletSpeed += 100;
         counter++;
         text1.text = "You clicked " + counter + " times!";
     }
@@ -648,7 +650,7 @@ function restart () {
     probeLives.callAll('revive');    
     //  And brings the aliens back from the dead :)
     aliens.removeAll();
-    createAliens();
+    //createAliens();
 
     //revives the player
     player.revive();

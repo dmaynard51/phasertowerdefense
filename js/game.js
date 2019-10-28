@@ -146,9 +146,9 @@ function create() {
     weapon3.fireRate = 10;    
 
     //  The hero!
-    player = game.add.sprite(400, 500, 'ship');
-    player.anchor.setTo(0.5, 0.5);
-    game.physics.enable(player, Phaser.Physics.ARCADE);
+   // player = game.add.sprite(400, 500, 'ship');
+    //player.anchor.setTo(0.5, 0.5);
+   // game.physics.enable(player, Phaser.Physics.ARCADE);
     
     // the probe
     probe = game.add.sprite(200, 500, 'probeImage');
@@ -312,25 +312,10 @@ function update() {
         console.log(numEnemies);        
     }
     
-    if (player.alive)
+    if (probe.alive)
     {
         //  Reset the player, then check for movement keys
-        player.body.velocity.setTo(0, 0);
 
-        if (cursors.left.isDown)
-        {
-            player.body.velocity.x = -200;
-        }
-        else if (cursors.right.isDown)
-        {
-            player.body.velocity.x = 200;
-        }
-
-        //  Firing?
-        if (fireButton.isDown)
-        {
-            fireBullet();
-        }
         
 
 
@@ -350,8 +335,8 @@ function update() {
 
         //  Run collision
         game.physics.arcade.overlap(bullets, aliens, collisionHandler, null, this);
-        game.physics.arcade.overlap(enemyBullets, player, enemyHitsPlayer, null, this);
-        game.physics.arcade.overlap(aliens, player, alienHitsPlayer, null, this);   
+        //game.physics.arcade.overlap(enemyBullets, player, enemyHitsPlayer, null, this);
+        //game.physics.arcade.overlap(aliens, player, alienHitsPlayer, null, this);   
 
         
         game.physics.arcade.overlap(aliens, weapon1.bullets, probeHitsAliens, null, this);
@@ -808,8 +793,10 @@ function restart () {
     //createAliens();
 
     //revives the player
-    player.revive();
+    //player.revive();
     probe.revive();    
+    probe2.revive();
+    probe3.revive();
     //hides the text
     stateText.visible = false;
 

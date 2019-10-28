@@ -19,9 +19,9 @@ function preload() {
     game.load.spritesheet('invader', 'assets/games/invaders/invader32x32x4.png', 32, 32);
     game.load.image('ship', 'assets/games/invaders/player.png');
     game.load.spritesheet('kaboom', 'assets/games/invaders/explode.png', 128, 128);
-    game.load.image('starfield', 'assets/games/invaders/starfield.png');
+    game.load.image('starfield', 'assets/games/invaders/deep-space.jpg');
     game.load.image('background', 'assets/games/starstruck/background2.png');
-    game.load.image('probeImage', 'assets/games/invaders/player.png');
+    game.load.image('probeImage', 'assets/games/invaders/shipart.png');
     
     
     game.load.spritesheet('button', 'assets/sprites/gem.png', 100, 5);    
@@ -31,6 +31,8 @@ function preload() {
 }
 
 var probe;
+var probe2;
+var probe3;
 var button;
 var button2;
 var player;
@@ -54,7 +56,10 @@ var livingEnemies = [];
 var text1;
 var counter = 0;
 var weapon1;
+var weapon2;
+var weapon3;
 var numEnemies =1;
+var level = 1;
 
 function create() {
 
@@ -94,15 +99,10 @@ function create() {
 
     weapon1 = game.add.weapon(1, 'enemyBullet');
     
-
     //  The bullet will be automatically killed when it leaves the world bounds
     weapon1.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
-    //weapon.createMultiple(30, 'bullet');
-    //weapon.setAll('anchor.x', 0.5);
-    //weapon.setAll('anchor.y', 1);
 
     //  Because our bullet is drawn facing up, we need to offset its rotation:
-    weapon1.bulletAngleOffset = 90;
     weapon1.setBulletBodyOffset(32, 32, 20, 34);
 
     //  The speed at which the bullet is fired
@@ -112,7 +112,38 @@ function create() {
     weapon1.fireRate = 10;
     
     
+    //2nd probe weapon
+    weapon2 = game.add.weapon(1, 'enemyBullet');
+    
+    //  The bullet will be automatically killed when it leaves the world bounds
+    weapon2.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
 
+
+    //  Because our bullet is drawn facing up, we need to offset its rotation:
+    weapon2.setBulletBodyOffset(32, 32, 20, 34);
+
+    //  The speed at which the bullet is fired
+    weapon2.bulletSpeed = 400;
+
+    //  Speed-up the rate of fire, allowing them to shoot 1 bullet every 60ms
+    weapon2.fireRate = 10;    
+    
+    
+    //3rd probe weapon
+    weapon3 = game.add.weapon(1, 'enemyBullet');
+    
+    //  The bullet will be automatically killed when it leaves the world bounds
+    weapon3.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
+
+
+    //  Because our bullet is drawn facing up, we need to offset its rotation:
+    weapon3.setBulletBodyOffset(32, 32, 20, 34);
+
+    //  The speed at which the bullet is fired
+    weapon3.bulletSpeed = 400;
+
+    //  Speed-up the rate of fire, allowing them to shoot 1 bullet every 60ms
+    weapon3.fireRate = 10;    
 
     //  The hero!
     player = game.add.sprite(400, 500, 'ship');
@@ -120,13 +151,45 @@ function create() {
     game.physics.enable(player, Phaser.Physics.ARCADE);
     
     // the probe
-    probe = game.add.sprite(200, 500, 'ship');
+    probe = game.add.sprite(200, 500, 'probeImage');
     probe.anchor.setTo(0.3, 0.3);
+    //scale down new ship image
+    probe.scale.setTo(.1, .1);
+    
     probe.inputEnabled = true;
-    game.physics.enable(probe, Phaser.Physics.ARCADE);
+    //move angle down to 0
+    probe.angle = 0;
     
     
+    
+    
+    // the probe2
+    probe2 = game.add.sprite(300, 500, 'probeImage');
+    probe2.anchor.setTo(0.3, 0.3);
+    //scale down new ship image
+    probe2.scale.setTo(.1, .1);
+    
+    probe2.inputEnabled = true;
+    //move angle down to 0
+    probe2.angle = 0;    
+    game.physics.enable(probe2, Phaser.Physics.ARCADE);
+    
+    // the probe3
+    probe3 = game.add.sprite(400, 500, 'probeImage');
+    probe3.anchor.setTo(0.3, 0.3);
+    //scale down new ship image
+    probe3.scale.setTo(.1, .1);
+    
+    probe3.inputEnabled = true;
+    //move angle down to 0
+    probe3.angle = 0;    
+    
+    
+    
+    //move weapon with probe
     weapon1.trackSprite(probe);        
+    weapon2.trackSprite(probe2);   
+    weapon3.trackSprite(probe3);       
 
     //  The baddies!
     aliens = game.add.group();
@@ -134,7 +197,7 @@ function create() {
     
     aliens.physicsBodyType = Phaser.Physics.ARCADE;
 
-    createAliens();
+    //createAliens();
 
 
 
@@ -175,7 +238,7 @@ function create() {
 
     //  An explosion pool
     explosions = game.add.group();
-    explosions.createMultiple(30, 'kaboom');
+    explosions.createMultiple(50, 'kaboom');
     explosions.forEach(setupInvader, this);
 
     //  And some controls to play the game with
@@ -189,7 +252,7 @@ function create() {
 
 function createAliens () {
     //numEnemies *= 2;
-    for (var y = 0; y < numEnemies; y++)
+    for (var y = 0; y < 1; y++)
     {
         for (var x = 0; x < 5; x++)
         {
@@ -280,6 +343,8 @@ function update() {
             if (probeLives => 1)
             {
                 probeFires();
+                probeFires2();
+                probeFires3();
             }
         }        
 
@@ -287,9 +352,11 @@ function update() {
         game.physics.arcade.overlap(bullets, aliens, collisionHandler, null, this);
         game.physics.arcade.overlap(enemyBullets, player, enemyHitsPlayer, null, this);
         game.physics.arcade.overlap(aliens, player, alienHitsPlayer, null, this);   
-        //game.physics.arcade.overlap(aliens, weapon1, probeHitsAliens, null, this); 
+
         
         game.physics.arcade.overlap(aliens, weapon1.bullets, probeHitsAliens, null, this);
+        game.physics.arcade.overlap(aliens, weapon2.bullets, probeHitsAliens2, null, this);       
+        game.physics.arcade.overlap(aliens, weapon3.bullets, probeHitsAliens3, null, this);        
         //game.physics.arcade.collide(aliens, weapon);
         game.physics.arcade.overlap(aliens, probe, alienHitsProbe, null, this);  
         
@@ -371,6 +438,58 @@ function probeHitsAliens (alien, weapon1) {
 */
 }
 
+function probeHitsAliens2 (alien, weapon2) {
+
+    //  When a bullet hits an alien we kill them both
+    weapon2.kill();
+    alien.kill();
+
+
+    //  Increase the score
+    score += 20;
+    scoreText.text = scoreString + score;
+
+    //  And create an explosion :)
+    var explosion = explosions.getFirstExists(false);
+    explosion.reset(alien.body.x, alien.body.y);
+    explosion.play('kaboom', 30, false, true);
+
+
+}
+
+
+function probeHitsAliens3 (alien, weapon3) {
+
+    //  When a bullet hits an alien we kill them both
+    weapon3.kill();
+    alien.kill();
+
+
+    //  Increase the score
+    score += 20;
+    scoreText.text = scoreString + score;
+
+    //  And create an explosion :)
+    var explosion = explosions.getFirstExists(false);
+    explosion.reset(alien.body.x, alien.body.y);
+    explosion.play('kaboom', 30, false, true);
+
+
+/*
+    if (aliens.countLiving() == 0)
+    {
+        score += 1000;
+        scoreText.text = scoreString + score;
+
+        //weapon1.callAll('kill',this);
+        stateText.text = " You Won, \n Click to restart";
+        stateText.visible = true;
+
+        //the "click to restart" handler
+        game.input.onTap.addOnce(restart,this);
+    }
+*/
+}
 
 
 function enemyHitsPlayer (player,bullet) {
@@ -572,9 +691,11 @@ function probeFires () {
         //probeFiringTimer = game.time.now + 1000;
     }
 
-/*
-    //  Grab the first bullet we can from the pool
-    enemyBullet = weapon.getFirstExists(false);
+
+}
+
+function probeFires2 () {
+
 
     livingEnemies.length=0;
 
@@ -585,20 +706,54 @@ function probeFires () {
     });
 
 
-    if (enemyBullet && livingEnemies.length > 0)
+    if (livingEnemies.length > 0)
     {
         
         var random=game.rnd.integerInRange(0,livingEnemies.length-1);
 
         // randomly select one of them
-        var shooter=probe;
+        //var shooter=probe;
+        weapon2.fireAtSprite(livingEnemies[random]);
+        
         // And fire the bullet from this enemy
-        enemyBullet.reset(shooter.body.x, shooter.body.y);
+        //enemyBullet.reset(shooter.body.x, shooter.body.y);
 
-        game.physics.arcade.moveToObject(enemyBullet,livingEnemies[random],120);
-        probeFiringTimer = game.time.now + 1000;
+        //game.physics.arcade.moveToObject(enemyBullet,livingEnemies[random],120);
+        //probeFiringTimer = game.time.now + 1000;
     }
-*/
+
+
+}
+
+function probeFires3 () {
+
+
+    livingEnemies.length=0;
+
+    aliens.forEachAlive(function(alien){
+
+        // put every living enemy in an array
+        livingEnemies.push(alien);
+    });
+
+
+    if (livingEnemies.length > 0)
+    {
+        
+        var random=game.rnd.integerInRange(0,livingEnemies.length-1);
+
+        // randomly select one of them
+        //var shooter=probe;
+        weapon3.fireAtSprite(livingEnemies[random]);
+        
+        // And fire the bullet from this enemy
+        //enemyBullet.reset(shooter.body.x, shooter.body.y);
+
+        //game.physics.arcade.moveToObject(enemyBullet,livingEnemies[random],120);
+        //probeFiringTimer = game.time.now + 1000;
+    }
+
+
 }
 
 
